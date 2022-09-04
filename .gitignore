@@ -1,0 +1,43 @@
+#eclipse ignore
+.metadata
+.settings
+**/.classpath
+
+#idea ignore
+.idea
+*.ipr
+*.iws
+*.iml
+
+#gradle
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+index
+**/indexes
+
+
+#package file
+*.class
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+#maven ignore
+target
+build
+
+
+# temp file
+*.log
+*.cache
+*.diff
+*.patch
+*.tmp
+.pmd
+
