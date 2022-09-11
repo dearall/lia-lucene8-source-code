@@ -21,10 +21,10 @@ public class QueryToStringTest {
 
         BooleanQuery query = builder.build();
 
-        System.out.println("query: " + query.toString());
-        System.out.println("query: " + query.toString("field"));
-
         assertEquals("both kinds", "+kountry~2 title:western",
                 query.toString("field"));
+
+        System.out.println("query: " + query.toString());
+        System.out.println("query: " + query.toString("field"));
     }
 }

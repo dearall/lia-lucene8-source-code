@@ -32,54 +32,58 @@ import static org.junit.Assert.assertTrue;
 public class BooleanQueryTest {
   @Test
   public void testAnd() throws Exception {
-    TermQuery searchingBooks = new TermQuery(new Term("subject","search"));  //#1
+    TermQuery searchingBooks = new TermQuery(new Term("subject","search"));                 //①
 
-    Query books2010 = IntPoint.newRangeQuery("pubmonth",
-            201001,  201012);   //#2
+    Query books2010 = IntPoint.newRangeQuery("pubmonth", 201001,  201012);  //②
 
     BooleanQuery.Builder builder = new BooleanQuery.Builder();
-    builder.add(searchingBooks, BooleanClause.Occur.MUST);  //#3
-    builder.add(books2010, BooleanClause.Occur.MUST);       //#3
-    BooleanQuery searchingBooks2010 = builder.build();
+    builder.add(searchingBooks, BooleanClause.Occur.MUST);  //③
+    builder.add(books2010, BooleanClause.Occur.MUST);       //③
+    BooleanQuery searchingBooks2010 = builder.build();      //④
 
-//    Directory dir = TestUtil.getBookIndexDirectory();
-    Directory directory = FSDirectory.open(new File( "../index").toPath());
-    DirectoryReader dirReader = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(dirReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
     TopDocs matches = searcher.search(searchingBooks2010, 10);
 
     assertTrue(TestUtil.hitsIncludeTitle(searcher, matches,
                                  "Lucene in Action, Second Edition"));
 
-    dirReader.close();
+    for(int i=0; i<matches.totalHits.value; i++) {
+      System.out.print("match " + i + "  [subject]: " + searcher.doc(matches.scoreDocs[i].doc).get("subject"));
+      System.out.println(" [pubmonth]: " + searcher.doc(matches.scoreDocs[i].doc).get("pubmonth"));
+    }
+
+    reader.close();
     directory.close();
   }
 
 /*
-#1 Match books with subject “search”
-#2 Match books in 2004
-#3 Combines two queries
+① 匹配 "subject" 域包含 "search"
+② 匹配出版日期 "pubmonth" 域在 [201001, 201012] 区间
+③ 使用 MUST 操作符联合两个子查询
+④ 构建 BooleanQuery 实例对象
 */
 
   @Test
   public void testOr() throws Exception {
-    TermQuery methodologyBooks = new TermQuery(                       // #1
-               new Term("category",                                // #1
-                 "/technology/computers/programming/methodology"));   // #1
+    TermQuery methodologyBooks = new TermQuery(                       // ①
+               new Term("category",                                // ①
+                 "/technology/computers/programming/methodology"));   // ①
 
-    TermQuery easternPhilosophyBooks = new TermQuery(                 // #2
-        new Term("category",                                       // #2
-            "/philosophy/eastern"));                                  // #2
+    TermQuery easternPhilosophyBooks = new TermQuery(                 // ②
+        new Term("category",                                       // ②
+            "/philosophy/eastern"));                                  // ②
 
-    BooleanQuery.Builder builder = new BooleanQuery.Builder();        // #3
-    builder.add(methodologyBooks, BooleanClause.Occur.SHOULD);        // #3
-    builder.add(easternPhilosophyBooks, BooleanClause.Occur.SHOULD);  // #3
-    BooleanQuery enlightenmentBooks = builder.build();                // #3
+    BooleanQuery.Builder builder = new BooleanQuery.Builder();        // ③
+    builder.add(methodologyBooks, BooleanClause.Occur.SHOULD);        // ③
+    builder.add(easternPhilosophyBooks, BooleanClause.Occur.SHOULD);  // ③
+    BooleanQuery enlightenmentBooks = builder.build();                // ④
 
-    //Directory dir = TestUtil.getBookIndexDirectory();
-    Directory directory = FSDirectory.open(new File( "../index").toPath());
-    DirectoryReader dirReader = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(dirReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
+
     TopDocs matches = searcher.search(enlightenmentBooks, 10);
     System.out.println("or = " + enlightenmentBooks);
 
@@ -87,13 +91,19 @@ public class BooleanQueryTest {
                                          "Extreme Programming Explained"));
     assertTrue(TestUtil.hitsIncludeTitle(searcher, matches,
                                          "Tao Te Ching \u9053\u5FB7\u7D93"));
-    dirReader.close();
+
+    for(int i=0; i<matches.totalHits.value; i++) {
+      System.out.print("match " + i + "  [title]: " + searcher.doc(matches.scoreDocs[i].doc).get("title"));
+      System.out.println(" [category]: " + searcher.doc(matches.scoreDocs[i].doc).get("category"));
+    }
+    reader.close();
     directory.close();
   }
 
   /*
-#1 Match 1st category
-#2 Match 2nd category
-#3 Combine
+  ① 匹配第一个 "category" 的 TermQuery
+  ② 匹配第二个 "category" 的 TermQuery
+  ③ 使用 SHOULD 操作符联合两个 TermQuery
+  ④ 构建 BooleanQuery 对象
    */
 }

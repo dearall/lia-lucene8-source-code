@@ -45,24 +45,24 @@ public class Explainer {
 
     System.out.println("Query: " + queryExpression);
 
-    DirectoryReader dr = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(dr);
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
     TopDocs topDocs = searcher.search(query, 10);
 
     for (ScoreDoc match : topDocs.scoreDocs) {
-      Explanation explanation
-         = searcher.explain(query, match.doc);     //#A
+      Explanation explanation = searcher.explain(query, match.doc);     // ①
 
       System.out.println("----------");
       Document doc = searcher.doc(match.doc);
       System.out.println(doc.get("title"));
-      System.out.println(explanation.toString());  //#B
+      System.out.println(explanation.toString());  //②
     }
-    dr.close();
+    reader.close();
     directory.close();
   }
 }
+
 /*
-#A Generate Explanation
-#B Output Explanation
+  ① 返回 Explanation 对象
+  ② 打印输出 Explanation 对象
 */

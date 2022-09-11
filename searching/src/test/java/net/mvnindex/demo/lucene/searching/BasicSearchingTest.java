@@ -70,18 +70,16 @@ public class BasicSearchingTest {
 
   @Test
   public void testKeyword() throws Exception {
-//    Directory dir = TestUtil.getBookIndexDirectory();
-    Directory directory = FSDirectory.open(new File( "../index").toPath());
-    DirectoryReader dirReader = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(dirReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
 
     Term t = new Term("isbn", "9781935182023");
     Query query = new TermQuery(t);
     TopDocs docs = searcher.search(query, 10);
-    assertEquals("JUnit in Action, Second Edition",
-                 1, docs.totalHits.value);
+    assertEquals("JUnit in Action, Second Edition", 1, docs.totalHits.value);
 
-    dirReader.close();
+    reader.close();
     directory.close();
   }
 

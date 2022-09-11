@@ -35,30 +35,40 @@ import static org.junit.Assert.assertTrue;
 public class PrefixQueryTest {
   @Test
   public void testPrefix() throws Exception {
-//    Directory dir = TestUtil.getBookIndexDirectory();
-    Directory directory = FSDirectory.open(new File( "../index").toPath());
-    DirectoryReader dirReader = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(dirReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
 
-    Term term = new Term("category",                           //#A
-                         "/technology/computers/programming");    //#A
-    PrefixQuery query = new PrefixQuery(term);                    //#A
+    Term term = new Term("category", "/technology/computers/programming");
 
-    TopDocs matches = searcher.search(query, 10);                 //#A
+    PrefixQuery query = new PrefixQuery(term);                      //①
+    TopDocs matches = searcher.search(query, 10);
     long programmingAndBelow = matches.totalHits.value;
+    System.out.println("PrefixQuery matches totalHits: "+ programmingAndBelow);
 
-    matches = searcher.search(new TermQuery(term), 10);           //#B
+    for(int i=0; i<matches.scoreDocs.length; i++) {
+      System.out.print("match " + i + "  [title]: " + searcher.doc(matches.scoreDocs[i].doc).get("title"));
+      System.out.println(" [category]: " + searcher.doc(matches.scoreDocs[i].doc).get("category"));
+    }
+
+    matches = searcher.search(new TermQuery(term), 10);           //②
     long justProgramming = matches.totalHits.value;
+    System.out.println("-------------------");
+    System.out.println("TermQuery matches totalHits: "+ justProgramming);
+    for(int i=0; i<matches.totalHits.value; i++) {
+      System.out.print("match " + i + "  [title]: " + searcher.doc(matches.scoreDocs[i].doc).get("title"));
+      System.out.println(" [category]: " + searcher.doc(matches.scoreDocs[i].doc).get("category"));
+    }
 
     assertTrue(programmingAndBelow > justProgramming);
 
-    dirReader.close();
+    reader.close();
     directory.close();
   }
 }
 
 /*
-  #A Search, including subcategories
-  #B Search, without subcategories
+  #① PrefixQuery 查询, 搜索结果包括其本身，以及以其为前缀的子分类
+  #② TermQuery 查询, 只搜索结果只包括其本身，不包括以其为前缀的子分类
 */
 

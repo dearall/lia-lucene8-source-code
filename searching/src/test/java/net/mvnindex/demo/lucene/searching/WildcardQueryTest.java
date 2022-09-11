@@ -13,21 +13,49 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 
 public class WildcardQueryTest {
+    private final String indexPath = "indexes";
     private Directory directory;
+    private DirectoryReader reader;
+    private IndexWriter writer;
+    private IndexSearcher searcher;
+
+    @Before
+    public void setUp() throws IOException {
+        directory = FSDirectory.open(Paths.get(indexPath));
+        IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
+        writer = new IndexWriter(directory, config);
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        reader.close();
+        directory.close();
+        deleteDir(new File(indexPath));
+    }
+    public static void deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                new File(dir, children[i]).delete();
+            }
+        }
+        dir.delete();
+    }
 
     private void indexSingleFieldDocs(Field[] fields) throws Exception {
-        directory = new RAMDirectory();
-        IndexWriterConfig wconfig = new IndexWriterConfig(new WhitespaceAnalyzer());
-        wconfig.setCommitOnClose(true);
-
-        IndexWriter writer = new IndexWriter(directory, wconfig);
-
         for (Field f : fields) {
             Document doc = new Document();
             doc.add(f);
@@ -45,9 +73,9 @@ public class WildcardQueryTest {
                     new TextField("contents", "mild", Field.Store.YES),
                     new TextField("contents", "mildew", Field.Store.YES)
                 });
-        DirectoryReader directoryReader = DirectoryReader.open(directory);
-        IndexSearcher searcher = new IndexSearcher(directoryReader);
-        Query query = new WildcardQuery(new Term("contents", "?ild*"));
+        reader = DirectoryReader.open(directory);
+        searcher = new IndexSearcher(reader);
+        Query query = new WildcardQuery(new Term("contents", "?ild*")); //①
 
         TopDocs matches = searcher.search(query, 10);
         assertEquals("child no match", 3, matches.totalHits.value);
@@ -57,6 +85,14 @@ public class WildcardQueryTest {
         assertEquals("score the same", matches.scoreDocs[1].score,
                 matches.scoreDocs[2].score, 0.0);
 
-        directoryReader.close();
+        for(int i=0; i<matches.scoreDocs.length; i++) {
+            System.out.print("match " + i + "  [contents]: " + searcher.doc(matches.scoreDocs[i].doc).get("contents"));
+            System.out.println(" [score]: " + matches.scoreDocs[i].score);
+        }
     }
 }
+
+/*
+* ① 创建 WildcardQuery 实例
+*
+* */

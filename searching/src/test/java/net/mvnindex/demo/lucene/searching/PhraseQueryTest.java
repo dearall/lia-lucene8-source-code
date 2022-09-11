@@ -27,54 +27,67 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 // From chapter 3
 public class PhraseQueryTest {
-  private Directory dir;
-  private DirectoryReader directoryReader;
+  private final String indexPath = "indexes";
+  private Directory directory;
+  private DirectoryReader reader;
   private IndexSearcher searcher;
 
   @Before
   public void setUp() throws IOException {
-    dir = new RAMDirectory();
+    directory = FSDirectory.open(Paths.get(indexPath));
     IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
-    config.setCommitOnClose(true);
-    IndexWriter writer = new IndexWriter(dir, config);
+    IndexWriter writer = new IndexWriter(directory, config);
 
     Document doc = new Document();
-    doc.add(new TextField("field",                           // 1
-              "the quick brown fox jumped over the lazy dog",     // 1
-              Field.Store.YES ));                                 // 1
+    doc.add(new TextField("field",                           // ①
+              "the quick brown fox jumped over the lazy dog",
+              Field.Store.YES ));
     writer.addDocument(doc);
     writer.close();
 
-    directoryReader = DirectoryReader.open(dir);
-    searcher = new IndexSearcher(directoryReader);
+    reader = DirectoryReader.open(directory);
+    searcher = new IndexSearcher(reader);
   }
 
   @After
   public void tearDown() throws IOException {
-    directoryReader.close();
-    dir.close();
+    reader.close();
+    directory.close();
+    deleteDir(new File(indexPath));
   }
 
+  public static void deleteDir(File dir) {
+    if (dir.isDirectory()) {
+      String[] children = dir.list();
+      for (int i = 0; i < children.length; i++) {
+        new File(dir, children[i]).delete();
+      }
+    }
+    dir.delete();
+  }
   private boolean matched(String[] phrase, int slop)
       throws IOException {
 
     PhraseQuery.Builder builder = new PhraseQuery.Builder();
-    builder.setSlop(slop);  // 2
+    builder.setSlop(slop);                      // ②
 
-    for (String word : phrase) {             // 3
-      builder.add(new Term("field", word));          // 3
+    for (String word : phrase) {
+      builder.add(new Term("field", word));  // ③
     }
     PhraseQuery query = builder.build();
     TopDocs matches = searcher.search(query, 10);
@@ -82,9 +95,9 @@ public class PhraseQueryTest {
     return matches.totalHits.value > 0;
   }
   /*
-    #1 Add a single test document
-    #2 Create initial PhraseQuery
-    #3 Add sequential phrase terms
+    ① 索引库中添加一个测试文档
+    ② 创建 PhraseQuery.Builder 实例并设置 slop 值
+    ③ 按顺序添加 term
    */
 
   @Test
@@ -118,5 +131,4 @@ public class PhraseQueryTest {
     assertTrue("bingo",
         matched(new String[] {"lazy", "jumped", "quick"}, 8));
   }
-
 }

@@ -18,6 +18,7 @@ package net.mvnindex.demo.lucene.searching;
 import net.mvnindex.demo.lucene.common.TestUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -39,23 +40,22 @@ import static org.junit.Assert.*;
 public class QueryParserTest {
 
   private Analyzer analyzer;
-  private Directory dir;
-  private DirectoryReader directoryReader;
+  private Directory directory;
+  private DirectoryReader reader;
   private IndexSearcher searcher;
 
   @Before
   public void setUp() throws Exception {
     analyzer = new WhitespaceAnalyzer();
-    //dir = TestUtil.getBookIndexDirectory();
-    dir = FSDirectory.open(new File("../index").toPath());
-    directoryReader = DirectoryReader.open(dir);
-    searcher = new IndexSearcher(directoryReader);
+    directory = TestUtil.getBookIndexDirectory();
+    reader = DirectoryReader.open(directory);
+    searcher = new IndexSearcher(reader);
   }
 
   @After
   public void tearDown() throws Exception {
-    directoryReader.close();
-    dir.close();
+    reader.close();
+    directory.close();
   }
 
   @Test
@@ -92,7 +92,7 @@ public class QueryParserTest {
     System.out.println("fuzzy: " + query);
     System.out.println("query type: " + query.getClass().getName());
 
-    query = parser.parse("kountry~0.7");
+    query = parser.parse("kountry~1");
     System.out.println("fuzzy 2: " + query);
     System.out.println("query type: " + query.getClass().getName());
   }
@@ -108,6 +108,10 @@ public class QueryParserTest {
     assertTrue(TestUtil.hitsIncludeTitle(searcher,
                                          matches,
                                          "The Pragmatic Programmer"));
+
+    for(int i=0; i<matches.scoreDocs.length; i++) {
+      System.out.println("match " + i + "  [subject]: " + searcher.doc(matches.scoreDocs[i].doc).get("subject"));
+    }
   }
 
 
@@ -120,7 +124,7 @@ public class QueryParserTest {
 
   @Test
   public void testTermRangeQuery() throws Exception {
-    Query query = new QueryParser("subject", analyzer).parse("title2:[Q TO V]"); //A
+    Query query = new QueryParser("subject", analyzer).parse("title2:[q TO v]"); //①
     assertTrue(query instanceof TermRangeQuery);
     System.out.println("query type: " + query.getClass().getName());
 
@@ -129,38 +133,57 @@ public class QueryParserTest {
 
     assertTrue(TestUtil.hitsIncludeTitle(searcher, matches, "Tapestry in Action"));
 
-    query = new QueryParser("subject", analyzer)  //B
-                            .parse("title2:{Q TO \"TAPESTRY IN ACTION\"}");    //B
-    matches = searcher.search(query, 10);
-    System.out.println("matches count: "+ matches.totalHits.value);
-
     for (ScoreDoc match : matches.scoreDocs){
       Document doc = searcher.doc(match.doc);
       System.out.println("title: " + doc.get("title"));
     }
 
-    assertFalse(TestUtil.hitsIncludeTitle(searcher, matches,  "Tapestry in Action"));
+    System.out.println("-------------");
+
+    query = new QueryParser("subject", analyzer)
+                            .parse("title2:{q TO \"tapestry in action\"}");       //②
+    matches = searcher.search(query, 10);
+    System.out.println("matches count: "+ matches.totalHits.value);
+
+    assertFalse(TestUtil.hitsIncludeTitle(searcher, matches,  "Tapestry in Action"));//③
+
+    for (ScoreDoc match : matches.scoreDocs){
+      Document doc = searcher.doc(match.doc);
+      System.out.println("title: " + doc.get("title"));
+    }
   }
   /*
-    #A Verify inclusive range
-    #B Verify exclusive range
-    #C Exclude Mindstorms book
+    ① 验证包含边界的范围 range
+    ② 验证排除边界的范围 range
+    ③ 验证排除 "Tapestry in Action"
   */
+
+/*
+  @Test
+  public void testPointRangeQuery() throws ParseException{
+    Query query = new QueryParser("subject", analyzer).parse("pubmonth:[200605 TO 200609]"); //①
+    System.out.println("query type: " + query.getClass().getName());
+
+
+  }
+*/
 
   @Test
   public void testPhraseQuery() throws Exception {
-    Query q = new QueryParser("field", new StandardAnalyzer())
+    Query q = new QueryParser("field", new StandardAnalyzer(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET))
                 .parse("\"This is Some Phrase*\"");
+
+    assertEquals("analyzed",
+        "\"? ? some phrase\"", q.toString("field"));
 
     System.out.println("q.toString(): " + q.toString());
     System.out.println("q.type: " + q.getClass().getName());
-    assertEquals("analyzed",
-        "\"this is some phrase\"", q.toString("field"));
+
 
     q = new QueryParser("field", analyzer).parse("\"term\"");
+    assertTrue("reduced to TermQuery", q instanceof TermQuery);
 
     System.out.println("q type: " + q.getClass().getName());
-    assertTrue("reduced to TermQuery", q instanceof TermQuery);
   }
 
   @Test
@@ -184,7 +207,7 @@ public class QueryParserTest {
     Query q = new QueryParser("field", analyzer).parse("PrefixQuery*");
     assertEquals("not lowercased", "PrefixQuery*", q.toString("field"));
 
-/*    QueryParser qp = new QueryParser("field", analyzer);
+/*  QueryParser qp = new QueryParser("field", analyzer);
     qp.setLowercaseExpandedTerms(false);
     q = qp.parse("PrefixQuery*");
     assertEquals("not lowercased", "PrefixQuery*", q.toString("field"));*/

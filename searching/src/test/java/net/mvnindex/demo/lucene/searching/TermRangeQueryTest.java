@@ -23,6 +23,7 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.junit.Test;
 
 import java.io.File;
@@ -34,20 +35,20 @@ public class TermRangeQueryTest {
 
   @Test
   public void testTermRangeQuery() throws Exception {
-//    Directory dir = TestUtil.getBookIndexDirectory();
-    Directory directory = FSDirectory.open(new File( "../index").toPath());
-    DirectoryReader dirReader = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(dirReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
     TermRangeQuery query = TermRangeQuery.newStringRange("title2", "d", "j", true, true);
+//  TermRangeQuery query = new TermRangeQuery("title2", new BytesRef("d"), new BytesRef("j"), true, true);
 
     TopDocs matches = searcher.search(query, 100);
     assertEquals(3, matches.totalHits.value);
 
-    for(int i=0;i<matches.totalHits.value;i++) {
+    for(int i=0;i<matches.scoreDocs.length;i++) {
       System.out.println("match " + i + ": " + searcher.doc(matches.scoreDocs[i].doc).get("title2"));
     }
 
-    dirReader.close();
+    reader.close();
     directory.close();
   }
 }
