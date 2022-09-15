@@ -22,6 +22,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.LetterTokenizer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import java.io.Reader;
@@ -32,16 +33,9 @@ import java.util.Set;
 // From chapter 4
 public class StopAnalyzer2 extends Analyzer {
   private final CharArraySet stopWords;
-  public static final CharArraySet ENGLISH_STOP_WORDS_SET;
-  static {
-    List<String> stopWords = Arrays.asList("a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these", "they", "this", "to", "was", "will", "with");
-    CharArraySet stopSet = new CharArraySet(stopWords.size(), false);
-    stopSet.addAll(stopWords);
-    ENGLISH_STOP_WORDS_SET = CharArraySet.unmodifiableSet(stopSet);
-  }
 
   public StopAnalyzer2() {
-    stopWords = ENGLISH_STOP_WORDS_SET;
+    stopWords = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
   }
 
   public StopAnalyzer2(String[] stopWords) {

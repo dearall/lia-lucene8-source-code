@@ -20,6 +20,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import java.io.IOException;
@@ -33,30 +34,23 @@ import java.util.List;
  * written by Erik
  */
 public class AnalyzerDemo {
-  public static final CharArraySet ENGLISH_STOP_WORDS_SET;
   private static final String[] examples = {
     "The quick brown fox jumped over the lazy dog",
     "XY&Z Corporation - xyz@example.com"
   };
 
-  static {
-    List<String> stopWords = Arrays.asList("a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these", "they", "this", "to", "was", "will", "with");
-    CharArraySet stopSet = new CharArraySet(stopWords.size(), false);
-    stopSet.addAll(stopWords);
-    ENGLISH_STOP_WORDS_SET = CharArraySet.unmodifiableSet(stopSet);
-  }
 
   private static final Analyzer[] analyzers = new Analyzer[] { 
     new WhitespaceAnalyzer(),
     new SimpleAnalyzer(),
-    new StopAnalyzer(ENGLISH_STOP_WORDS_SET),
-    new StandardAnalyzer()
+    new StopAnalyzer(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET),
+    new StandardAnalyzer(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET)
   };
 
   public static void main(String[] args) throws IOException {
 
     String[] strings = examples;
-    if (args.length > 0) {    // A
+    if (args.length > 0) {    // ①
       strings = args;
     }
 
@@ -71,11 +65,11 @@ public class AnalyzerDemo {
       String name = analyzer.getClass().getSimpleName();
       System.out.println("  " + name + ":");
       System.out.print("    ");
-      AnalyzerUtils.displayTokens(analyzer, text); // B
+      AnalyzerUtils.displayTokens(analyzer, text); // ②
       System.out.println("\n");
     }
   }
 }
 
-// #A Analyze command-line strings, if specified
-// #B Real work done in here
+// ① 如果指定，分析命令行参数
+// ② 真正分析和显示分析结果的工作

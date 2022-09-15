@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 public class AnalyzerUtils {
   public static void displayTokens(Analyzer analyzer,
                                    String text) throws IOException {
-    displayTokens(analyzer.tokenStream("contents", new StringReader(text)));  //A
+    displayTokens(analyzer.tokenStream("contents", new StringReader(text)));  //①
   }
 
   public static void displayTokens(TokenStream stream)
@@ -43,14 +43,14 @@ public class AnalyzerUtils {
     CharTermAttribute term = stream.addAttribute(CharTermAttribute.class);
     stream.reset();
     while(stream.incrementToken()) {
-      System.out.print("[" + term.toString() + "] ");    //B
+      System.out.print("[" + term.toString() + "] ");    //②
     }
     stream.end();
     stream.close();
   }
   /*
-    #A Invoke analysis process
-    #B Print token text surrounded by brackets
+    ① 调用分析过程
+    ② 使用方括号 [] 包围，打印词元文本
   */
   public static int getPositionIncrement(AttributeSource source) {
     PositionIncrementAttribute attr = source.addAttribute(PositionIncrementAttribute.class);
@@ -110,32 +110,31 @@ public class AnalyzerUtils {
   public static void displayTokensWithFullDetails(Analyzer analyzer,
                                                   String text) throws IOException {
 
-    TokenStream stream = analyzer.tokenStream("contents",                        // #A
+    TokenStream stream = analyzer.tokenStream("contents",                // ①
                                               new StringReader(text));
 
-    CharTermAttribute term = stream.addAttribute(CharTermAttribute.class);        // #B
-    PositionIncrementAttribute posIncr =                                  // #B 
-    	stream.addAttribute(PositionIncrementAttribute.class);              // #B
-    OffsetAttribute offset = stream.addAttribute(OffsetAttribute.class);  // #B
-    TypeAttribute type = stream.addAttribute(TypeAttribute.class);        // #B
+    CharTermAttribute term = stream.addAttribute(CharTermAttribute.class);        // ②
+    PositionIncrementAttribute posIncr =  stream.addAttribute(PositionIncrementAttribute.class); // ②
+    OffsetAttribute offset = stream.addAttribute(OffsetAttribute.class);  // ②
+    TypeAttribute type = stream.addAttribute(TypeAttribute.class);        // ②
 
     stream.reset();
 
     int position = 0;
-    while(stream.incrementToken()) {                                  // #C
+    while(stream.incrementToken()) {                                  // ③
 
-      int increment = posIncr.getPositionIncrement();                 // #D
-      if (increment > 0) {                                            // #D
-        position = position + increment;                              // #D
-        System.out.println();                                         // #D
-        System.out.print(position + ": ");                            // #D
+      int increment = posIncr.getPositionIncrement();                 // ④
+      if (increment > 0) {                                            // ④
+        position = position + increment;                              // ④
+        System.out.println();                                         // ④
+        System.out.print(position + ": ");                            // ④
       }
 
-      System.out.print("[" +                                 // #E
-                       term.toString() + ":" +                   // #E
-                       offset.startOffset() + "->" +         // #E
-                       offset.endOffset() + ":" +            // #E
-                       type.type() + "] ");                  // #E
+      System.out.print("[" +                                 // ⑤
+                       term.toString() + ":" +               // ⑤
+                       offset.startOffset() + "->" +         // ⑤
+                       offset.endOffset() + ":" +            // ⑤
+                       type.type() + "] ");                  // ⑤
     }
     stream.end();
     stream.close();
@@ -143,11 +142,11 @@ public class AnalyzerUtils {
     System.out.println();
   }
   /*
-    #A Perform analysis
-    #B Obtain attributes of interest
-    #C Iterate through all tokens
-    #D Compute position and print
-    #E Print all token details
+    ① 执行分析
+    ② 获得感兴趣的属性 attribute
+    ③ 迭代所有的词项
+    ④ 计算位置并输出位置值 position
+    ⑤ 打印出所有的词元 token 细节信息
    */
 
   public static void assertAnalyzesTo(Analyzer analyzer, String input,
@@ -185,11 +184,12 @@ public class AnalyzerUtils {
     System.out.println("SimpleAnalyzer");
     displayTokensWithFullDetails(new SimpleAnalyzer(),
         "The quick brown fox....");
-
+/*
     System.out.println("\n----");
     System.out.println("StandardAnalyzer");
     displayTokensWithFullDetails(new StandardAnalyzer(),
         "I'll email you at xyz@example.com");
+    */
   }
 }
 
