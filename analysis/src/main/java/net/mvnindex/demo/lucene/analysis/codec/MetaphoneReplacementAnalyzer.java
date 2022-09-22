@@ -16,12 +16,8 @@ package net.mvnindex.demo.lucene.analysis.codec;
 */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.core.LetterTokenizer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.StopFilter;
-
-import java.io.Reader;
 
 // From chapter 4
 public class MetaphoneReplacementAnalyzer extends Analyzer {

@@ -15,10 +15,7 @@ package net.mvnindex.demo.lucene.analysis.stopanalyzer;
  * See the License for the specific lan      
 */
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.core.LetterTokenizer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.core.StopFilter;
@@ -31,22 +28,21 @@ import java.util.List;
 import java.util.Set;
 
 // From chapter 4
-public class StopAnalyzer2 extends Analyzer {
-  private final CharArraySet stopWords;
+public class StopAnalyzer2 extends StopwordAnalyzerBase {
 
   public StopAnalyzer2() {
-    stopWords = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
+    super(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
   }
 
   public StopAnalyzer2(String[] stopWords) {
-    this.stopWords = StopFilter.makeStopSet(stopWords);
+    super(StopFilter.makeStopSet(stopWords));
   }
 
   @Override
   protected TokenStreamComponents createComponents(String fieldName) {
     LetterTokenizer src = new LetterTokenizer();
     TokenStream tokenStream = new LowerCaseFilter(src);
-    tokenStream = new StopFilter(tokenStream, stopWords);
+    tokenStream = new StopFilter(tokenStream, stopwords);
 
     return new TokenStreamComponents(r -> {
       src.setReader(r);

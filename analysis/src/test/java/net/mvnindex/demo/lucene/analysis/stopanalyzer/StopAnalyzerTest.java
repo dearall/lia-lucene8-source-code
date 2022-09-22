@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 import net.mvnindex.demo.lucene.analysis.AnalyzerUtils;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.core.StopAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -26,15 +27,7 @@ import java.util.List;
 
 // From chapter 4
 public class StopAnalyzerTest extends TestCase {
-  public static final CharArraySet ENGLISH_STOP_WORDS_SET;
-  static {
-    List<String> stopWords = Arrays.asList("a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these", "they", "this", "to", "was", "will", "with");
-    CharArraySet stopSet = new CharArraySet(stopWords.size(), false);
-    stopSet.addAll(stopWords);
-    ENGLISH_STOP_WORDS_SET = CharArraySet.unmodifiableSet(stopSet);
-  }
-
-  private StopAnalyzer stopAnalyzer = new StopAnalyzer(ENGLISH_STOP_WORDS_SET);
+  private StopAnalyzer stopAnalyzer = new StopAnalyzer(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
 
   @Test
   public void testHoles() throws Exception {

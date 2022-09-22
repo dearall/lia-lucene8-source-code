@@ -16,6 +16,7 @@ package net.mvnindex.demo.lucene.analysis.synonym;
 */
 
 import org.apache.lucene.analysis.*;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 
 import java.util.Arrays;
@@ -24,14 +25,6 @@ import java.util.List;
 // From chapter 4
 public class SynonymAnalyzer extends Analyzer {
   private SynonymEngine engine;
-
-  public static final CharArraySet ENGLISH_STOP_WORDS_SET;
-  static {
-    List<String> stopWords = Arrays.asList("a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these", "they", "this", "to", "was", "will", "with");
-    CharArraySet stopSet = new CharArraySet(stopWords.size(), false);
-    stopSet.addAll(stopWords);
-    ENGLISH_STOP_WORDS_SET = CharArraySet.unmodifiableSet(stopSet);
-  }
 
   public SynonymAnalyzer(SynonymEngine engine) {
     this.engine = engine;
@@ -42,7 +35,7 @@ public class SynonymAnalyzer extends Analyzer {
     StandardTokenizer source = new StandardTokenizer();
 
     TokenStream tokenStream = new LowerCaseFilter(source);
-    tokenStream = new StopFilter(tokenStream, ENGLISH_STOP_WORDS_SET);
+    tokenStream = new StopFilter(tokenStream, EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
     tokenStream = new SynonymFilter(tokenStream, engine);
 
     return new TokenStreamComponents(r -> {

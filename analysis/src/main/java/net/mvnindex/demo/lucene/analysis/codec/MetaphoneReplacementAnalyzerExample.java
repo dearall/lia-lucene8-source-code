@@ -10,9 +10,13 @@ public class MetaphoneReplacementAnalyzerExample {
                 new MetaphoneReplacementAnalyzer();
         AnalyzerUtils.displayTokens(analyzer,
                 "The quick brown fox jumped over the lazy dog");
+//        AnalyzerUtils.displayTokens(analyzer, "cool cat");
+
 
         System.out.println("");
         AnalyzerUtils.displayTokens(analyzer,
                 "Tha quik brown phox jumpd ovvar tha lazi dag");
+
+//        AnalyzerUtils.displayTokens(analyzer, "kool kat");
     }
 }

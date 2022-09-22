@@ -29,6 +29,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.*;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
@@ -45,12 +46,12 @@ import static org.junit.Assert.assertTrue;
 // From chapter 5
 public class MultiPhraseQueryTest {
   private Directory directory;
-  private DirectoryReader directoryReader;
+  private DirectoryReader reader;
   private IndexSearcher searcher;
 
   @Before
   public void setUp() throws Exception {
-    directory = new RAMDirectory();
+    directory = new ByteBuffersDirectory();
     IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
     IndexWriter writer = new IndexWriter(directory, config);
 
@@ -67,24 +68,24 @@ public class MultiPhraseQueryTest {
     writer.addDocument(doc2);
     writer.close();
 
-    directoryReader = DirectoryReader.open(directory);
-    searcher = new IndexSearcher(directoryReader);
+    reader = DirectoryReader.open(directory);
+    searcher = new IndexSearcher(reader);
   }
 
   @After
   public void tearDown() throws Exception {
-    directoryReader.close();
+    reader.close();
     directory.close();
   }
 
   @Test
   public void testBasic() throws Exception {
     MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder();
-    builder.add(new Term[] {                             // #A
-        new Term("field", "quick"),              // #A
-        new Term("field", "fast")                // #A
+    builder.add(new Term[] {                             // ①
+        new Term("field", "quick"),               // ①
+        new Term("field", "fast")                 // ①
     });
-    builder.add(new Term("field", "fox"));         // #B
+    builder.add(new Term("field", "fox"));        // ②
 
     MultiPhraseQuery query = builder.build();
 
@@ -92,6 +93,8 @@ public class MultiPhraseQueryTest {
 
     TopDocs hits = searcher.search(query, 10);
     assertEquals("fast fox match", 1, hits.totalHits.value);
+    int docID = hits.scoreDocs[0].doc;
+    System.out.println("match: "+ searcher.doc(docID).get("field"));
 
     builder.setSlop(1);
     query = builder.build();
@@ -100,12 +103,14 @@ public class MultiPhraseQueryTest {
 
     hits = searcher.search(query, 10);
     assertEquals("both match", 2, hits.totalHits.value);
+
+    debug(hits);
   }
 
-  /*
-#A Any of these terms may be in first position to match
-#B Only one in second position
-  */
+/*
+① 数组在的每一个词项都可以在第一个位置上匹配
+② 第二个位置上只有一个词项 fox
+*/
 
   @Test
   public void testAgainstOR() throws Exception {
@@ -154,6 +159,5 @@ public class MultiPhraseQueryTest {
       Document doc = searcher.doc(sd.doc);
       System.out.println(sd.score + ": " + doc.get("field"));
     }
-
   }
 }

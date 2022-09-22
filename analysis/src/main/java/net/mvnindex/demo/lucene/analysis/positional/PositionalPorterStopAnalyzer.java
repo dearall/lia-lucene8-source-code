@@ -25,15 +25,15 @@ import java.io.Reader;
 import java.util.Set;
 
 // From chapter 4
-public class PositionalPorterStopAnalyzer extends Analyzer {
+public class PositionalPorterStopAnalyzer extends StopwordAnalyzerBase {
   private CharArraySet stopWords;
 
   public PositionalPorterStopAnalyzer() {
-    this(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
+    super(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
   }
 
   public PositionalPorterStopAnalyzer(CharArraySet stopWords) {
-    this.stopWords = stopWords;
+    super(stopWords);
   }
 
   @Override

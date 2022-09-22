@@ -38,22 +38,22 @@ public class MetaphoneReplacementFilter extends TokenFilter {
   }
 
   public final boolean incrementToken() throws IOException {
-    if (!input.incrementToken())                    //#A  
-      return false;                                 //#A  
+    if (!input.incrementToken())                    // ①
+      return false;
 
     String encoded;
-    encoded = metaphoner.encode(termAttr.toString());   //#B
+    encoded = metaphoner.encode(termAttr.toString());//②
     termAttr.setEmpty();
-    termAttr.append(encoded);                //#C
-    typeAttr.setType(METAPHONE);                    //#D
+    termAttr.append(encoded);                        //③
+    typeAttr.setType(METAPHONE);                     //④
 
     return true;
   }
 }
 
 /*
-#A Advance to next token
-#B Convert to Metaphone encoding
-#C Overwrite with encoded text
-#D Set token type
+① 转入下一个词元
+② 转换到 Metaphone 编码
+③ 使用编码后的文本覆盖原始的 CharTermAttribute 词元文本
+④ 设置词元类型为 METAPHONE，即 "metaphone"
 */

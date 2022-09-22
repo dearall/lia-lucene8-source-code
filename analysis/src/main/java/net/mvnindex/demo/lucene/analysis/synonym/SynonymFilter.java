@@ -36,7 +36,7 @@ public class SynonymFilter extends TokenFilter {
 
   public SynonymFilter(TokenStream in, SynonymEngine engine) {
     super(in);
-    synonymStack = new Stack<String>();                     //#1 
+    synonymStack = new Stack<String>();                     // ①
     this.engine = engine;
 
     this.termAtt = addAttribute(CharTermAttribute.class);
@@ -44,31 +44,31 @@ public class SynonymFilter extends TokenFilter {
   }
 
   public final boolean incrementToken() throws IOException {
-    if (synonymStack.size() > 0) {                          //#2
-      String syn = synonymStack.pop();                      //#2
-      restoreState(current);                                //#2
+    if (synonymStack.size() > 0) {                          // ②
+      String syn = synonymStack.pop();                      // ②
+      restoreState(current);                                // ②
       termAtt.setEmpty();
       termAtt.append(syn);
-      posIncrAtt.setPositionIncrement(0);                   //#3
+      posIncrAtt.setPositionIncrement(0);                   // ③
       return true;
     }
 
-    if (!input.incrementToken())                            //#4  
+    if (!input.incrementToken())                            // ④
       return false;
 
-    if (addAliasesToStack()) {                              //#5 
-      current = captureState();                             //#6
+    if (addAliasesToStack()) {                              // ⑤
+      current = captureState();                             // ⑥
     }
 
-    return true;                                            //#7
+    return true;                                            // ⑦
   }
 
   private boolean addAliasesToStack() throws IOException {
-    String[] synonyms = engine.getSynonyms(termAtt.toString()); //#8
+    String[] synonyms = engine.getSynonyms(termAtt.toString()); // ⑧
     if (synonyms == null) {
       return false;
     }
-    for (String synonym : synonyms) {                       //#9
+    for (String synonym : synonyms) {                           // ⑨
       synonymStack.push(synonym);
     }
     return true;
@@ -76,13 +76,13 @@ public class SynonymFilter extends TokenFilter {
 }
 
 /*
-#1 Define synonym buffer
-#2 Pop buffered synonyms
-#3 Set position increment to 0
-#4 Read next token
-#5 Push synonyms onto stack
-#6 Save current token
-#7 Return current token
-#8 Retrieve synonyms
-#9 Push synonyms onto stack
+① 定义同义词缓存
+② 弹出缓存的同义词
+③ 设置位置增量为 0
+④ 读取下一个词元
+⑤ 将当期词元的所有同义词压入缓存栈
+⑥ 保存当前词元状态
+⑦ 返回当前词元
+⑧ 检索当前词元的所有同义词
+⑨ 将检索到的每一个同义词压入到缓存栈
 */

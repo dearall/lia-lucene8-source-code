@@ -32,8 +32,7 @@ import static org.junit.Assert.*;
 
 // From chapter 4
 public class AnalyzerUtils {
-  public static void displayTokens(Analyzer analyzer,
-                                   String text) throws IOException {
+  public static void displayTokens(Analyzer analyzer, String text) throws IOException {
     displayTokens(analyzer.tokenStream("contents", new StringReader(text)));  //①
   }
 

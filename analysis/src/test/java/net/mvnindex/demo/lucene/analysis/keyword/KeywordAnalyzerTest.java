@@ -33,12 +33,15 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,59 +49,73 @@ import static org.junit.Assert.assertEquals;
 
 // From chapter 4
 public class KeywordAnalyzerTest {
+  private final String indexPath = "indexes";
   private Directory directory;
-  private DirectoryReader directoryReader;
+  private DirectoryReader reader;
   private IndexSearcher searcher;
 
   @Before
   public void setUp() throws Exception {
-    directory = new RAMDirectory();
+    directory = FSDirectory.open(Paths.get(indexPath));
     IndexWriterConfig config = new IndexWriterConfig(new SimpleAnalyzer());
     IndexWriter writer = new IndexWriter(directory, config);
 
     Document doc = new Document();
-    doc.add(new StringField("partnum",
+    doc.add(new StringField("partnum",  // ①
                       "Q36",
-                      Field.Store.NO)); //A
+                      Field.Store.NO));
 
     doc.add(new TextField("description",
                       "Illidium Space Modulator",
                       Field.Store.YES));
 
     writer.addDocument(doc);
-
     writer.close();
-    directoryReader = DirectoryReader.open(directory);
-    searcher = new IndexSearcher(directoryReader);
+
+    reader = DirectoryReader.open(directory);
+    searcher = new IndexSearcher(reader);
   }
 
   @After
   public void tearDown() throws Exception {
-    directoryReader.close();
+    reader.close();
     directory.close();
+    deleteDir(new File(indexPath));
+  }
+
+  public static void deleteDir(File dir) {
+    if (dir.isDirectory()) {
+      String[] children = dir.list();
+      for (int i = 0; i < children.length; i++) {
+        new File(dir, children[i]).delete();
+      }
+    }
+    dir.delete();
   }
 
   @Test
   public void testTermQuery() throws Exception {
-    Query query = new TermQuery(new Term("partnum", "Q36"));  //B
-    assertEquals(1, TestUtil.hitCount(searcher, query)); //C
+    Query query = new TermQuery(new Term("partnum", "Q36"));    // ②
+    assertEquals(1, TestUtil.hitCount(searcher, query));        // ③
   }
 
   @Test
   public void testBasicQueryParser() throws Exception {
-    Query query = new QueryParser("description", new SimpleAnalyzer())            //1
-                      .parse("partnum:Q36 AND SPACE");                //1
+    Query query = new QueryParser("description", new SimpleAnalyzer())             // ④
+                      .parse("partnum:Q36 AND SPACE");                          // ④
     assertEquals("note Q36 -> q",
-                 "+partnum:q +space", query.toString("description"));    //2
+                 "+partnum:q +space", query.toString("description"));    // ⑤
     assertEquals("doc not found :(", 0, TestUtil.hitCount(searcher, query));
+
+    System.out.println("query 表示： " + query.toString("description"));
   }
 
 /*
-#A Don't analyze field
-#B Don't analyze term
-#C Verify document matches
-#1 QueryParser analyzes each term and phrase
-#2 toString() method
+① StringField 不对域进行分析
+② 通过 API 直接创建 TermQuery，不对词项进行分析
+③ 验证文档匹配
+④ QueryParser 对每个词项和短语进行分析
+⑤ toString() 方法，输出 "+partnum:q +space"
 */
 
   @Test

@@ -21,6 +21,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.junit.Test;
@@ -33,14 +34,18 @@ import static org.junit.Assert.assertEquals;
 public class ChineseTest {
   @Test
   public void testChinese() throws Exception {
-    //Directory dir = TestUtil.getBookIndexDirectory();
-    Directory dir = FSDirectory.open(new File( "../index").toPath());
-    DirectoryReader directoryReader = DirectoryReader.open(dir);
-    IndexSearcher searcher = new IndexSearcher(directoryReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
 
     Query query = new TermQuery(new Term("contents", "道"));
     assertEquals("tao", 1, TestUtil.hitCount(searcher, query));
 
-    directoryReader.close();
+    TopDocs docs = searcher.search(query, 1);
+    int doc = docs.scoreDocs[0].doc;
+    System.out.println("matched [title]: " + searcher.doc(doc).get("title"));
+
+    reader.close();
+    directory.close();
   }
 }
