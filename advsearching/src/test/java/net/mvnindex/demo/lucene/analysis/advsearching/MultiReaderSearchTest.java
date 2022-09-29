@@ -25,6 +25,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
@@ -56,8 +57,8 @@ public class MultiReaderSearchTest {
                        "walrus", "xiphias", "yak", "zebra"};
 
 
-    aTOmDirectory = new RAMDirectory();
-    nTOzDirectory = new RAMDirectory();
+    aTOmDirectory = new ByteBuffersDirectory();
+    nTOzDirectory = new ByteBuffersDirectory();
 
     IndexWriter aTOmWriter = new IndexWriter(aTOmDirectory, aIndexWriterConfig);
     IndexWriter nTOzWriter = new IndexWriter(nTOzDirectory, bIndexWriterConfig);
@@ -105,7 +106,8 @@ public class MultiReaderSearchTest {
     System.out.println("scoreDocs length: " + scoreDocs.length);
 
     for (ScoreDoc sd : scoreDocs) {
-      System.out.println("docId: "+sd.doc + "  doc: " + indexSearcher.doc(sd.doc));
+      System.out.println("[docId]: "+sd.doc + ",  [animal]: "
+              + indexSearcher.doc(sd.doc).get("animal") + ", [score]: " + sd.score);
     }
 
     multiReader.close();

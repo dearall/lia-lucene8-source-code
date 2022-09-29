@@ -19,10 +19,12 @@ package net.mvnindex.demo.lucene.common;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.*;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.NumericUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,51 +47,63 @@ public class CreateTestIndex {
     String category = file.getParent().substring(rootDir.length()); // ①
     category = category.replace(File.separatorChar, '/');   // ①
 
-    String isbn = props.getProperty("isbn");          //②
-    String title = props.getProperty("title");        //②
-    String author = props.getProperty("author");      //②
-    String url = props.getProperty("url");            //②
-    String subject = props.getProperty("subject");    //②
+    String isbn = props.getProperty("isbn");                  //②
+    String title = props.getProperty("title");                //②
+    String author = props.getProperty("author");              //②
+    String url = props.getProperty("url");                    //②
+    String subject = props.getProperty("subject");            //②
+    String weight = props.getProperty("weight");              //②
+    System.out.println("weight: "+ weight);
 
-    String pubmonth = props.getProperty("pubmonth");   //②
+    String pubmonth = props.getProperty("pubmonth");          //②
 
     System.out.println(title + "\n" + author + "\n" + subject + "\n" + pubmonth + "\n" + category + "\n---------");
 
-    doc.add(new StringField("isbn",               //③
+
+    doc.add(new StringField("isbn",                     //③
                       isbn,
                       Field.Store.YES));
-    doc.add(new StringField("category",           //③
+    doc.add(new StringField("category",                 //③
                       category,
                       Field.Store.YES));
-    doc.add(new SortedDocValuesField("category",  //③
+    doc.add(new SortedDocValuesField("category",        //③
                       new BytesRef(category)));
 
-    doc.add(new TextField("title",                //③
-                      title,
-                      Field.Store.YES));
+    FieldType tvTextStoredType = new FieldType(TextField.TYPE_STORED);
+    tvTextStoredType.setStoreTermVectors(true);
+    tvTextStoredType.setStoreTermVectorOffsets(true);
+    tvTextStoredType.setStoreTermVectorPositions(true);
 
-    doc.add(new StringField("title2",             //③
-                      title.toLowerCase(),
-                      Field.Store.YES));
+    doc.add(new Field("title", title,                   //③
+                      tvTextStoredType));
 
-    doc.add(new SortedDocValuesField("title2",    //③
+    FieldType tvStringStoredType = new FieldType(StringField.TYPE_STORED);
+    tvStringStoredType.setStoreTermVectors(true);
+    tvStringStoredType.setStoreTermVectorOffsets(true);
+    tvStringStoredType.setStoreTermVectorPositions(true);
+    doc.add(new Field("title2", title.toLowerCase(),    //③
+            tvStringStoredType));
+
+    doc.add(new SortedDocValuesField("title2",          //③
                       new BytesRef(title.toLowerCase())));
+
+    tvStringStoredType.setOmitNorms(false);
 
     // split multiple authors into unique field instances
     String[] authors = author.split(",");
-    for (String a : authors) {                         //③
-      doc.add(new TextField("author",
-                        a,
-                        Field.Store.YES));
+    for (String a : authors) {                                //③
+      doc.add(new Field("author", a, tvStringStoredType));
     }
 
-    doc.add(new StringField("url",                //③
+    doc.add(new StringField("url",                       //③
                       url,
                       Field.Store.YES));
 
-    doc.add(new TextField("subject",              //③
-                      subject,
-                      Field.Store.YES));
+    doc.add(new Field("subject", subject,                //③
+                      tvTextStoredType));
+
+    doc.add(new FloatDocValuesField("weight", Float.parseFloat(weight)));         //③
+//  doc.add(new SortedNumericDocValuesField("weight", NumericUtils.floatToSortableInt(Float.parseFloat(weight))));//③
 
     doc.add(new IntPoint("pubmonth", Integer.parseInt(pubmonth)));                //③
     doc.add(new NumericDocValuesField("pubmonth", Integer.parseInt(pubmonth)));   //③
@@ -101,12 +115,17 @@ public class CreateTestIndex {
     } catch (ParseException pe) {
       throw new RuntimeException(pe);
     }
-    doc.add(new IntPoint("pubmonthAsDay", (int) (d.getTime()/(1000*3600*24)))) ;              //③
-    doc.add(new NumericDocValuesField("pubmonthAsDay", (int) (d.getTime()/(1000*3600*24)))) ; //③
+    doc.add(new IntPoint("pubmonthAsDay", (int) (d.getTime()/(1000*3600*24))));               //③
+    doc.add(new NumericDocValuesField("pubmonthAsDay", (int) (d.getTime()/(1000*3600*24))));  //③
     doc.add(new StoredField("pubmonthAsDay", (int) (d.getTime()/(1000*3600*24)))) ;
 
+    FieldType tvTextNotStoredType = new FieldType(TextField.TYPE_NOT_STORED);
+    tvTextNotStoredType.setStoreTermVectors(true);
+    tvTextNotStoredType.setStoreTermVectorOffsets(true);
+    tvTextNotStoredType.setStoreTermVectorPositions(true);
+
     for(String text : new String[] {title, subject, author, category}) {     //③④
-      doc.add(new TextField("contents", text, Field.Store.NO));
+      doc.add(new Field("contents", text, tvTextNotStoredType));
     }
 
     return doc;
@@ -158,7 +177,7 @@ public class CreateTestIndex {
 
     Directory dir = TestUtil.getBookIndexDirectory();
     IndexWriterConfig wconfig = new IndexWriterConfig(new MyStandardAnalyzer(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET));
-    wconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+    wconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE).setUseCompoundFile(false);
 
     IndexWriter w = new IndexWriter(dir,  wconfig);
 

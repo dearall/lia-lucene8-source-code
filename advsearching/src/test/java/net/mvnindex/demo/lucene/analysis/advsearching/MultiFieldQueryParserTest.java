@@ -18,17 +18,16 @@ package net.mvnindex.demo.lucene.analysis.advsearching;
 import junit.framework.TestCase;
 import net.mvnindex.demo.lucene.common.TestUtil;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -40,23 +39,23 @@ public class MultiFieldQueryParserTest {
     Query query = new MultiFieldQueryParser(new String[]{"title", "subject"}, new SimpleAnalyzer())
             .parse("development");
 
-    //Directory dir = TestUtil.getBookIndexDirectory();
-    Directory directory = FSDirectory.open(new File("../index").toPath());
-    DirectoryReader directoryReader = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(directoryReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
 
     TopDocs hits = searcher.search(query, 10);
 
-    assertTrue(TestUtil.hitsIncludeTitle(
-           searcher,
-           hits,
-           "Ant in Action"));
+    assertTrue(TestUtil.hitsIncludeTitle(searcher, hits, "Ant in Action"));
+    assertTrue(TestUtil.hitsIncludeTitle(searcher, hits, "Extreme Programming Explained"));
 
-    assertTrue(TestUtil.hitsIncludeTitle(     //A
-           searcher,                          //A
-           hits,                              //A
-           "Extreme Programming Explained")); //A
-    directoryReader.close();
+    for (ScoreDoc sd : hits.scoreDocs) {
+      Document doc = searcher.doc(sd.doc);
+      System.out.println("[title]: " + doc.get("title"));
+      System.out.println("[subject]: " + doc.get("subject"));
+      System.out.println();
+    }
+
+    reader.close();
     directory.close();
   }
 
@@ -70,24 +69,23 @@ public class MultiFieldQueryParserTest {
             flags,
             new SimpleAnalyzer());
 
-    Directory directory = FSDirectory.open(new File("../index").toPath());
-    DirectoryReader directoryReader = DirectoryReader.open(directory);
-    IndexSearcher searcher = new IndexSearcher(directoryReader);
+    Directory directory = TestUtil.getBookIndexDirectory();
+    DirectoryReader reader = DirectoryReader.open(directory);
+    IndexSearcher searcher = new IndexSearcher(reader);
 
     TopDocs hits = searcher.search(query, 10);
 
-    assertTrue(TestUtil.hitsIncludeTitle(
-            searcher,
-            hits,
-            "Lucene in Action, Second Edition"));
+    assertTrue(TestUtil.hitsIncludeTitle(searcher, hits, "Lucene in Action, Second Edition"));
     assertEquals("one and only one", 1, hits.scoreDocs.length);
 
-    directoryReader.close();
+    for (ScoreDoc sd : hits.scoreDocs) {
+      Document doc = searcher.doc(sd.doc);
+      System.out.println("[title]: " + doc.get("title"));
+      System.out.println("[subject]: " + doc.get("subject"));
+      System.out.println();
+    }
+
+    reader.close();
     directory.close();
   }
-
-  /*
-    #A Has development in the subject field
-   */
-
 }

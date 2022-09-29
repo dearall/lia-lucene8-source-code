@@ -112,15 +112,16 @@ public class SortingExample {
 
     example.displayResults(query, new Sort(new SortField("pubmonth", SortField.Type.INT, true))); // ②
 
-    example.displayResults(query,                                               // ②
-        new Sort(new SortField("category", SortField.Type.STRING),
+    example.displayResults(query,
+            new Sort(new SortField("category", SortField.Type.STRING),
                  SortField.FIELD_SCORE,
                  new SortField("pubmonth", SortField.Type.INT, true)
                  ));
 
 
-    example.displayResults(query, new Sort(new SortField[] {SortField.FIELD_SCORE, new SortField("category",
-            SortField.FIELD_DOC.getType().STRING)}));                           // ②
+    example.displayResults(query,                                               // ②
+            new Sort(SortField.FIELD_SCORE,
+                    new SortField("category", SortField.Type.STRING)));
 
 
     directory.close();

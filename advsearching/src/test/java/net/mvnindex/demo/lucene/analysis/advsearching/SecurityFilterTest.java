@@ -26,6 +26,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.After;
@@ -42,29 +43,18 @@ public class SecurityFilterTest {
 
   @Before
   public void setUp() throws Exception {
-    directory = new RAMDirectory();
+    directory = new ByteBuffersDirectory();
     IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
     IndexWriter writer = new IndexWriter(directory, config);
 
     Document document = new Document();
-    document.add(new StringField("owner",
-                           "elwood",
-                           Field.Store.YES));
-    document.add(new TextField("keywords",
-                           "elwood's sensitive info",
-                           Field.Store.YES));
-
+    document.add(new StringField("owner", "elwood", Field.Store.YES));
+    document.add(new TextField("keywords", "elwood's sensitive info", Field.Store.YES));
     writer.addDocument(document);
 
     document = new Document();
-    document.add(new StringField("owner",
-                           "jake",
-                           Field.Store.YES ));
-
-    document.add(new TextField("keywords",
-                           "jake's sensitive info",
-                           Field.Store.YES));
-
+    document.add(new StringField("owner", "jake", Field.Store.YES ));
+    document.add(new TextField("keywords", "jake's sensitive info", Field.Store.YES));
     writer.addDocument(document);
 
     writer.close();
@@ -79,24 +69,17 @@ public class SecurityFilterTest {
     directory.close();
   }
 
-  /*
-#1 Elwood
-#2 Jake
-  */
 
   @Test
   public void testSecurityFilter() throws Exception {
-    TermQuery query = new TermQuery(new Term("keywords", "info"));
+    TermQuery query = new TermQuery(new Term("keywords", "info"));                        // ①
+    assertEquals("Both documents match", 2, TestUtil.hitCount(searcher, query));  // ②
 
-    assertEquals("Both documents match",
-                 2,
-                 TestUtil.hitCount(searcher, query));
-
-    ConstantScoreQuery jakeFilter = new ConstantScoreQuery(new TermQuery(new Term("owner", "jake")));
+    ConstantScoreQuery jakeFilter = new ConstantScoreQuery(new TermQuery(new Term("owner", "jake"))); // ③
 
     BooleanQuery.Builder builder = new BooleanQuery.Builder();
     builder.add(query, BooleanClause.Occur.MUST);
-    builder.add(jakeFilter, BooleanClause.Occur.FILTER);
+    builder.add(jakeFilter, BooleanClause.Occur.MUST);                  // ④
     BooleanQuery booleanQuery = builder.build();
 
     TopDocs hits = searcher.search(booleanQuery, 10);
@@ -104,12 +87,13 @@ public class SecurityFilterTest {
     assertEquals(1, hits.totalHits.value);
     assertEquals("elwood is safe",
                  "jake's sensitive info",
-                  searcher.doc(hits.scoreDocs[0].doc).get("keywords"));
+                  searcher.doc(hits.scoreDocs[0].doc).get("keywords")); // ⑤
   }
   /*
-    #1 TermQuery for "info"
-    #2 Returns documents containing "info"
-    #3 Filter
-    #4 Same TermQuery, constrained results
+  ① 为 "keywords":"info" 词项创建 TermQuery 查询
+  ② 验证搜索包含 "keywords":"info" 的 2 个文档
+  ③ 构造过滤器，把文档的搜索范围限制在 jake 所有者的文档范围内
+  ④ 将查询子句和过滤子句连接起来构建布尔查询
+  ⑤ 执行过滤查询，并验证搜索结果，结果中只包含 "owner" 为 "jake" 的文档
   */
 }

@@ -45,11 +45,11 @@ public class TestUtil {
   public static long hitCount(IndexSearcher searcher, Query query, Query filter)
           throws IOException {
     BooleanQuery.Builder builder = new BooleanQuery.Builder();
-    builder.add(query, BooleanClause.Occur.MUST);
-    builder.add(filter, BooleanClause.Occur.FILTER);
+    builder.add(query, BooleanClause.Occur.MUST);         //①
+    builder.add(filter, BooleanClause.Occur.FILTER);      //②
     BooleanQuery booleanQuery = builder.build();
 
-    TopDocs topDocs = searcher.search(booleanQuery,10);
+    TopDocs topDocs = searcher.search(booleanQuery,10);// ③
 
     System.out.println("hit count: " + topDocs.totalHits.value);
     System.out.println("topDocs.scoreDocs[] length: " + topDocs.scoreDocs.length);
@@ -57,13 +57,18 @@ public class TestUtil {
     Document doc;
     for (ScoreDoc sd : topDocs.scoreDocs){
       doc =	searcher.doc(sd.doc);
-      String title2 = doc.get("title2");
-      System.out.println("hit doc title2: " + title2);
+      System.out.println("hit doc title: " + doc.get("title"));
       System.out.println("hit doc score: " + sd.score);
     }
+    System.out.println();
 
     return topDocs.totalHits.value;
   }
+/*
+  ① 通过 BooleanClause.Occur.MUST 操作符为 BooleanQuery 添加必须的查询子句
+  ② 通过 BooleanClause.Occur.FILTER 操作符为 BooleanQuery 添加过滤器
+  ③ 由 IndexSearcher 执行过滤查询
+  */
 
   public static void dumpHits(IndexSearcher searcher, TopDocs hits)
     throws IOException {
