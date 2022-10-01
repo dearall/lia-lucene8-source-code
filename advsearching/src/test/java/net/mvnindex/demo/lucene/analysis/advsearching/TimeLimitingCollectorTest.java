@@ -21,7 +21,6 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.TimeLimitingCollector.TimeExceededException;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.Counter;
 
 // From chapter 5
 public class TimeLimitingCollectorTest extends TestCase {

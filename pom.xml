@@ -15,6 +15,7 @@
         <module>searching</module>
         <module>analysis</module>
         <module>advsearching</module>
+        <module>extsearch</module>
     </modules>
 
     <properties>

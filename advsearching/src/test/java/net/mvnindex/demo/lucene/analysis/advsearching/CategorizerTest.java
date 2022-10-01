@@ -78,6 +78,9 @@ public class CategorizerTest {
       Terms terms = reader.getTermVector(i, "subject");
       addTermFreqToMap(vectorMap, terms);
     }
+
+    reader.close();
+    directory.close();
   }
 
   private void addTermFreqToMap(Map<String, Integer> vectorMap, Terms terms) throws IOException {
