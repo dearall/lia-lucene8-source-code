@@ -1,4 +1,4 @@
-package net.mvnindex.demo.lucene.extsearch;
+package net.mvnindex.demo.lucene.extsearch.sorting;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;

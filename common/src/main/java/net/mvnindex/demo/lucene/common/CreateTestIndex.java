@@ -95,11 +95,9 @@ public class CreateTestIndex {
       doc.add(new Field("author", a, tvStringStoredType));
     }
 
-    doc.add(new StringField("url",                       //③
-                      url,
-                      Field.Store.YES));
+    doc.add(new BinaryDocValuesField("url", new BytesRef(url)));                  //③
 
-    doc.add(new Field("subject", subject,                //③
+    doc.add(new Field("subject", subject,                                         //③
                       tvTextStoredType));
 
     doc.add(new FloatDocValuesField("weight", Float.parseFloat(weight)));         //③

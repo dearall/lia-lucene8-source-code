@@ -1,11 +1,9 @@
-package net.mvnindex.demo.lucene.extsearch;
+package net.mvnindex.demo.lucene.extsearch.sorting;
 
 import org.apache.lucene.geo.XYEncodingUtils;
 import org.apache.lucene.geo.XYRectangle;
 import org.apache.lucene.index.*;
-import org.apache.lucene.search.FieldComparator;
-import org.apache.lucene.search.LeafFieldComparator;
-import org.apache.lucene.search.Scorable;
+import org.apache.lucene.search.*;
 import org.apache.lucene.util.ArrayUtil;
 
 import java.io.IOException;

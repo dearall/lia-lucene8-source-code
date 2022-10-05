@@ -34,6 +34,12 @@
             <artifactId>lucene-analyzers-common</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.mvnindex.demo.lucene</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

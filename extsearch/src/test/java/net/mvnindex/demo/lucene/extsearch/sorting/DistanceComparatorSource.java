@@ -1,4 +1,4 @@
-package net.mvnindex.demo.lucene.extsearch;
+package net.mvnindex.demo.lucene.extsearch.sorting;
 
 /**
  * Copyright Manning Publications Co.
@@ -15,11 +15,7 @@ package net.mvnindex.demo.lucene.extsearch;
  * See the License for the specific lan      
 */
 
-import org.apache.lucene.document.XYDocValuesField;
-import org.apache.lucene.index.*;
 import org.apache.lucene.search.*;
-
-import java.io.IOException;
 
 // From chapter 6
 public class DistanceComparatorSource extends FieldComparatorSource { // ①

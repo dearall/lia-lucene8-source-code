@@ -1,4 +1,4 @@
-package net.mvnindex.demo.lucene.extsearch;
+package net.mvnindex.demo.lucene.extsearch.sorting;
 
 /**
  * Copyright Manning Publications Co.

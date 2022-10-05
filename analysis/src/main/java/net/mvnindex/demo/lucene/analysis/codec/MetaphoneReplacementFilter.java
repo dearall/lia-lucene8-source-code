@@ -38,14 +38,13 @@ public class MetaphoneReplacementFilter extends TokenFilter {
   }
 
   public final boolean incrementToken() throws IOException {
-    if (!input.incrementToken())                    // ①
+    if (!input.incrementToken())                             // ①
       return false;
 
-    String encoded;
-    encoded = metaphoner.encode(termAttr.toString());//②
+    String encoded = metaphoner.encode(termAttr.toString());  //②
     termAttr.setEmpty();
-    termAttr.append(encoded);                        //③
-    typeAttr.setType(METAPHONE);                     //④
+    termAttr.append(encoded);                                 //③
+    typeAttr.setType(METAPHONE);                              //④
 
     return true;
   }
