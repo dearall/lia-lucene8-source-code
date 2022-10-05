@@ -16,9 +16,7 @@ package net.mvnindex.demo.lucene.analysis.codec;
 */
 
 import junit.framework.TestCase;
-import net.mvnindex.demo.lucene.analysis.AnalyzerUtils;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -28,44 +26,30 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
 
 // From chapter 4
 public class MetaphoneAnalyzerTest extends TestCase {
-  private final String indexPath = "indexes";
   private Directory directory;
 
   @Before
   public void setUp() throws IOException {
-    directory = FSDirectory.open(Paths.get(indexPath));
+    directory = new ByteBuffersDirectory();
   }
 
   @After
   public void tearDown() throws IOException {
     directory.close();
-    deleteDir(new File(indexPath));
-  }
-
-  public static void deleteDir(File dir) {
-    if (dir.isDirectory()) {
-      String[] children = dir.list();
-      for (int i = 0; i < children.length; i++) {
-        new File(dir, children[i]).delete();
-      }
-    }
-    dir.delete();
   }
 
   @Test

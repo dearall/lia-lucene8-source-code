@@ -15,9 +15,6 @@ package net.mvnindex.demo.lucene.searching;
  * See the License for the specific lan      
 */
 
-import junit.framework.TestCase;
-import net.mvnindex.demo.lucene.common.TestUtil;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -27,42 +24,18 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 // From chapter 3
 public class NearRealTimeTest {
-  private final String indexPath = "indexes";
-
-  @After
-  public void tearDown() throws IOException {
-    deleteDir(new File(indexPath));
-  }
-
-  public static void deleteDir(File dir) {
-    if (dir.isDirectory()) {
-      String[] children = dir.list();
-      for (int i = 0; i < children.length; i++) {
-        new File(dir, children[i]).delete();
-      }
-    }
-    dir.delete();
-  }
-
   @Test
   public void testNearRealTime() throws Exception {
-    Directory  dir = FSDirectory.open(Paths.get(indexPath));
+    Directory dir = new ByteBuffersDirectory();
     IndexWriterConfig config = new IndexWriterConfig();
     IndexWriter writer = new IndexWriter(dir, config);
 

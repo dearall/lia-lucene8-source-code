@@ -21,17 +21,13 @@ import org.apache.lucene.index.*;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
-
 import static org.junit.Assert.*;
 
 // From chapter 2
@@ -75,7 +71,7 @@ public class IndexingTest {
 
   @Before
   public void setUp() throws Exception {        //①
-    directory = FSDirectory.open(Paths.get(indexPath));
+    directory = new ByteBuffersDirectory();
     IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
     config.setMergeScheduler(new SerialMergeScheduler()); //②
     indexWriter = new IndexWriter(directory, config); //③
@@ -97,17 +93,6 @@ public class IndexingTest {
   public void tearDown() throws IOException {
     indexWriter.close();
     directory.close();
-    deleteDir(new File(indexPath));
-  }
-
-  public static void deleteDir(File dir) {
-    if (dir.isDirectory()) {
-      String[] children = dir.list();
-      for (int i = 0; i < children.length; i++) {
-        new File(dir, children[i]).delete();
-      }
-    }
-    dir.delete();
   }
 
   protected long getHitCount(String fieldName, String searchString) throws IOException { // ⑧

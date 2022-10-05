@@ -12,21 +12,15 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
-
 import static org.junit.Assert.assertEquals;
 
 public class WildcardQueryTest {
-    private final String indexPath = "indexes";
     private Directory directory;
     private DirectoryReader reader;
     private IndexWriter writer;
@@ -34,7 +28,7 @@ public class WildcardQueryTest {
 
     @Before
     public void setUp() throws IOException {
-        directory = FSDirectory.open(Paths.get(indexPath));
+        directory = new ByteBuffersDirectory();
         IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
         writer = new IndexWriter(directory, config);
     }
@@ -43,16 +37,6 @@ public class WildcardQueryTest {
     public void tearDown() throws IOException {
         reader.close();
         directory.close();
-        deleteDir(new File(indexPath));
-    }
-    public static void deleteDir(File dir) {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                new File(dir, children[i]).delete();
-            }
-        }
-        dir.delete();
     }
 
     private void indexSingleFieldDocs(Field[] fields) throws Exception {

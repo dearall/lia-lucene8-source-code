@@ -28,25 +28,21 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.queryparser.classic.QueryParser;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 
 // From chapter 4
 public class SynonymAnalyzerTest {
-  private final String indexPath = "indexes";
   private Directory directory;
   private DirectoryReader reader;
   private IndexSearcher searcher;
@@ -55,7 +51,7 @@ public class SynonymAnalyzerTest {
 
   @Before
   public void setUp() throws IOException {
-    directory = FSDirectory.open(Paths.get(indexPath));
+    directory = new ByteBuffersDirectory();
     IndexWriterConfig config = new IndexWriterConfig(synonymAnalyzer);
     IndexWriter writer = new IndexWriter(directory, config);
 
@@ -75,19 +71,7 @@ public class SynonymAnalyzerTest {
   public void tearDown() throws IOException {
     reader.close();
     directory.close();
-    deleteDir(new File(indexPath));
   }
-
-  public static void deleteDir(File dir) {
-    if (dir.isDirectory()) {
-      String[] children = dir.list();
-      for (int i = 0; i < children.length; i++) {
-        new File(dir, children[i]).delete();
-      }
-    }
-    dir.delete();
-  }
-
 
   @Test
   public void testJumps() throws Exception {

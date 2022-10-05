@@ -32,16 +32,13 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +53,7 @@ public class KeywordAnalyzerTest {
 
   @Before
   public void setUp() throws Exception {
-    directory = FSDirectory.open(Paths.get(indexPath));
+    directory = new ByteBuffersDirectory();
     IndexWriterConfig config = new IndexWriterConfig(new SimpleAnalyzer());
     IndexWriter writer = new IndexWriter(directory, config);
 
@@ -80,17 +77,6 @@ public class KeywordAnalyzerTest {
   public void tearDown() throws Exception {
     reader.close();
     directory.close();
-    deleteDir(new File(indexPath));
-  }
-
-  public static void deleteDir(File dir) {
-    if (dir.isDirectory()) {
-      String[] children = dir.list();
-      for (int i = 0; i < children.length; i++) {
-        new File(dir, children[i]).delete();
-      }
-    }
-    dir.delete();
   }
 
   @Test
