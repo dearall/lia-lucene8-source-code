@@ -16,6 +16,7 @@
         <module>analysis</module>
         <module>advsearching</module>
         <module>extsearch</module>
+        <module>tools</module>
     </modules>
 
     <properties>
@@ -58,6 +59,16 @@
             <dependency>
                 <groupId>org.apache.lucene</groupId>
                 <artifactId>lucene-expressions</artifactId>
+                <version>${lucene.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.lucene</groupId>
+                <artifactId>lucene-highlighter</artifactId>
+                <version>${lucene.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.lucene</groupId>
+                <artifactId>lucene-suggest</artifactId>
                 <version>${lucene.version}</version>
             </dependency>
             <dependency>

@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Locale;
+import java.util.TimeZone;
 
 import static org.junit.Assert.assertTrue;
 
@@ -105,6 +106,9 @@ public class NumericQueryParserTest {
       Query q = super.getRangeQuery(field, part1, part2, startInclusive, endInclusive);
       TermRangeQuery query = (TermRangeQuery)q;
 
+      System.out.println("[getRangeQuery()]: field=" + field + ", part1="+part1+", part2="+part2 +
+              ", startInclusive="+startInclusive+ ", endInclusive="+endInclusive);
+
       if ("pubmonth".equals(field)) {
         return IntPoint.newRangeQuery(
                     "pubmonth",
@@ -131,6 +135,7 @@ public class NumericQueryParserTest {
     
     parser.setDateResolution("pubmonth", DateTools.Resolution.MONTH);    // ①
     parser.setLocale(Locale.CHINA);
+    parser.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
 
     Query query = parser.parse(expression);
     System.out.println(expression + " parsed to " + query);
