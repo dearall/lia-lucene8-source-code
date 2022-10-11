@@ -36,8 +36,8 @@ public class AllDocCollector implements Collector, LeafCollector {
 
   public void collect(int doc) throws IOException {
     docs.add(
-      new ScoreDoc(doc + docBase,       // ①
-                   scorer.score()));        // ②
+            new ScoreDoc(doc + docBase,       // ①
+                     scorer.score()));            // ②
   }
 
   public void reset() {
