@@ -17,6 +17,7 @@
         <module>advsearching</module>
         <module>extsearch</module>
         <module>tools</module>
+        <module>benchmark</module>
     </modules>
 
     <properties>
@@ -72,6 +73,11 @@
                 <version>${lucene.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.lucene</groupId>
+                <artifactId>lucene-benchmark</artifactId>
+                <version>${lucene.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
@@ -89,7 +95,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>

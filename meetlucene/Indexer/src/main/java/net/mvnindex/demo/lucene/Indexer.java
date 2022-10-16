@@ -15,6 +15,7 @@ package net.mvnindex.demo.lucene;
  * See the License for the specific lan      
 */
 
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
@@ -71,7 +72,8 @@ public class Indexer {
 
   public Indexer(String indexDir) throws IOException {
     Directory dir = FSDirectory.open(Paths.get(indexDir));
-    IndexWriterConfig wconfig = new IndexWriterConfig(new StandardAnalyzer());
+    IndexWriterConfig wconfig = new IndexWriterConfig(
+            new StandardAnalyzer(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET));
     wconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE)
             .setUseCompoundFile(false);
 
