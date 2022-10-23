@@ -64,17 +64,19 @@ public class NearRealTimeTest {
 
     DirectoryReader newReader = DirectoryReader.openIfChanged(reader); // ⑥
     assertFalse(reader == newReader);                          // ⑦
-    reader.close();                                                    // ⑧
-    searcher = new IndexSearcher(newReader);              
+    if(newReader != null) {
+      reader.close();                                                    // ⑧
+      searcher = new IndexSearcher(newReader);
 
-    TopDocs hits = searcher.search(query, 10);
-    assertEquals(9, hits.totalHits.value);                      // ⑨
+      TopDocs hits = searcher.search(query, 10);
+      assertEquals(9, hits.totalHits.value);                      // ⑨
 
-    query = new TermQuery(new Term("text", "bbb"));
-    hits = searcher.search(query, 1);
-    assertEquals(1, hits.totalHits.value);                      // ⑩
+      query = new TermQuery(new Term("text", "bbb"));
+      hits = searcher.search(query, 1);
+      assertEquals(1, hits.totalHits.value);                      // ⑩
 
-    newReader.close();
+      newReader.close();
+    }
     writer.close();
     dir.close();
   }

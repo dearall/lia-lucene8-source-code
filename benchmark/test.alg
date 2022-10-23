@@ -4,8 +4,8 @@ analyzer=org.apache.lucene.analysis.standard.StandardAnalyzer
 # Content source
 content.source=org.apache.lucene.benchmark.byTask.feeds.ReutersContentSource
 
-work.dir=G:/data
-docs.dir=G:/data/reuters-out
+work.dir=G:\\dev\\book\\benchmark-work
+docs.dir=G:\\dev\\book\\benchmark-work\\reuters-out
 
 # Directory
 directory=FSDirectory
@@ -34,7 +34,7 @@ content.source.forever = false
         -CreateIndex
 
         # Add all docs
-        { "AddDocs" AddDoc > : *
+        { "AddDocs" AddDoc > : 21578
 
         # Close the index
         -CloseIndex

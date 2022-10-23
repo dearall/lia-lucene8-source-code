@@ -18,6 +18,7 @@
         <module>extsearch</module>
         <module>tools</module>
         <module>benchmark</module>
+        <module>admin</module>
     </modules>
 
     <properties>
